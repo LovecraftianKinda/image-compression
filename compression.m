@@ -13,8 +13,8 @@ else
 end
 
 % Get image path from the same directory as the script
-script_dir = fileparts(mfilename('fullpath')); % Get script directory
-image_file = fullfile(script_dir, file_name); % Concatenate with image filename
+script_directory = fileparts(mfilename('fullpath')); % Get script directory
+image_file = fullfile(script_directory, file_name); % Concatenate with image filename
 
 %Checks if the image exists or not
 if ~exist(image_file, 'file')  % Check if file exists
@@ -25,6 +25,10 @@ end
 %If the image is RGB (color), imread returns a 3D matrix of size (height x width x 3)
 %If the image is grayscale, imread returns a 2D matix of size (height x width)
 img = imread(image_file); % Load image
+size_old = dir(image_file).bytes;%save the size of file for future computation
+
+K_vals = [2 10 50 100];%values of k to compress nxm to nxk
+len_k = length(K_vals);
 
 switch lower(file_type)
 
@@ -44,22 +48,32 @@ switch lower(file_type)
 
         disp("Compressing image.....");
 
-        compressed_R = mat_comp(R,100);
-        compressed_G = mat_comp(G,100);
-        compressed_B = mat_comp(B,100);
+        compressed_img = cell(1, len_k);
 
-        compressed_img = cat(3,compressed_R,compressed_G,compressed_B);
+        disp("Multiplying a bunch of matrices...");
+        for i = 1:len_k
+            disp(["Compressing for k = ",num2str(K_vals(i))]);
+            compressed_R = mat_comp(R, K_vals(i));
+            compressed_G = mat_comp(G, K_vals(i));
+            compressed_B = mat_comp(B, K_vals(i));
+    
+            compressed_img{i} = cat(3, compressed_R, compressed_G, compressed_B);
+            disp("Done.");
+        end
 
+        disp("Displaying all the images....");
         figure;
-        subplot(1,2,1);
+        subplot(1,len_k+1,1);
         imshow(img);
         axis image;
-        title('Original Image');
+        title('Original Image','FontSize', 18, 'FontWeight', 'bold', 'FontName', 'Arial');
 
-        subplot(1,2,2);
-        imshow(compressed_img);
-        axis image;
-        title('Compressed Image');
+        for i = 1:len_k
+            subplot(1,len_k+1,i+1);
+            imshow(compressed_img{i});
+            axis image;
+            title(['K = ',num2str(K_vals(i))],'FontSize', 18, 'FontWeight', 'bold', 'FontName', 'Arial');
+        end
 
         disp("Done.");
         
@@ -69,18 +83,29 @@ switch lower(file_type)
         end
 
         disp("Compressing image.....");
-        compressed_img = mat_comp(img,100);
 
+        compressed_img = cell(1, len_k);
+
+        disp("Multiplying a bunch of matrices...");
+        for i = 1:len_k
+            disp(["Compressing for k = ",num2str(K_vals(i))]);
+            compressed_img{i} = mat_comp(img, K_vals(i));
+            disp("Done.");
+        end
+
+        disp("Displaying all the images....");
         figure;
-        subplot(1,2,1);
+        subplot(1,len_k+1,1);
         imshow(img);
         axis image;
-        title('Original Image');
+        title('Original Image','FontSize', 18, 'FontWeight', 'bold', 'FontName', 'Arial');
 
-        subplot(1,2,2);
-        imshow(compressed_img);
-        axis image;
-        title('Compressed Image');
+        for i = 1:len_k
+            subplot(1,len_k+1,i+1);
+            imshow(compressed_img{i});
+            axis image;
+            title(['K = ',num2str(K_vals(i))],'FontSize', 18, 'FontWeight', 'bold', 'FontName', 'Arial');
+        end
 
         disp("Done.");
         
@@ -88,4 +113,12 @@ switch lower(file_type)
         error("Invalid format. Use 'rgb' or 'gray'.");
 end
 
-imwrite(compressed_img, 'last_result.jpg');
+disp("Saving....");
+for i = 1:len_k
+    new_file_name = ['compressed_K', num2str(K_vals(i)), '.jpg'];
+    imwrite(compressed_img{i}, new_file_name);
+    size_new = dir(new_file_name).bytes;
+    compression_perc = (1 - (size_new/size_old)) * 100;
+    disp(['Saved: ',new_file_name, ' | Compression Percentage: ',num2str(compression_perc, '%.3f'), '%']);
+end
+disp("Done....");
