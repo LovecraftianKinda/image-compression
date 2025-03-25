@@ -1,7 +1,11 @@
 function ReturnMatrix = mat_comp(matrix,k)
 
     matrix = double(matrix);
-    [U S V] = svd(matrix,'econ') ;
+    [U S V] = svd(matrix,'econ') ; %calculating U S V values
+
+    %k_max to cap the max value k can be
+    k_max = min(size(matrix));
+
     %S is always non-negative as they are the roots of eigenvalues of AA'
     %Matlab and OCTAVE always present these in descending order
     %so to compress stuff we don't need to sort for the most significant
