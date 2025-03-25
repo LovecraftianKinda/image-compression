@@ -32,10 +32,9 @@ switch lower(file_type)
 
         %if gray image is passed of as rgb we have to convert it into 3d array
         if ndims(img) == 2  
-            R = img; %same as the image is grayscale
-            G = img; %same as the image is grayscale
-            B = img; %same as the image is grayscale
+            error("The given image is grayscale but RGB was selected.");
         else
+            %Separate the image into 3 different channels and compress them all
             R = img(:,:,1); % Red channel
             G = img(:,:,2); % Green channel
             B = img(:,:,3); % Blue channel
@@ -43,42 +42,50 @@ switch lower(file_type)
 
         zero_channel = zeros(size(R), 'uint8');
 
-        Red_Image   = cat(3, R, zero_channel, zero_channel);
-        Green_Image = cat(3, zero_channel, G, zero_channel);
-        Blue_Image  = cat(3, zero_channel, zero_channel, B);
+        disp("Compressing image.....");
+
+        compressed_R = mat_comp(R,100);
+        compressed_G = mat_comp(G,100);
+        compressed_B = mat_comp(B,100);
+
+        compressed_img = cat(3,compressed_R,compressed_G,compressed_B);
 
         figure;
-
-        subplot(1,4,1);
+        subplot(1,2,1);
         imshow(img);
         axis image;
         title('Original Image');
 
-        subplot(1,4,2);
-        imshow(Red_Image);
+        subplot(1,2,2);
+        imshow(compressed_img);
         axis image;
-        title('Red Channel');
+        title('Compressed Image');
 
-        subplot(1,4,3);
-        imshow(Green_Image);
-        axis image;
-        title('Green Channel');
-
-        subplot(1,4,4);
-        imshow(Blue_Image);
-        axis image;
-        title('Blue Channel');
-
+        disp("Done.");
+        
     case 'gray'
         if ~(ndims(img) == 2)
             img = rgb2gray(img);
         end
 
-        figure;
+        disp("Compressing image.....");
+        compressed_img = mat_comp(img,100);
 
+        figure;
+        subplot(1,2,1);
         imshow(img);
         axis image;
         title('Original Image');
+
+        subplot(1,2,2);
+        imshow(compressed_img);
+        axis image;
+        title('Compressed Image');
+
+        disp("Done.");
+        
     otherwise
         error("Invalid format. Use 'rgb' or 'gray'.");
 end
+
+imwrite(compressed_img, 'last_result.jpg');
