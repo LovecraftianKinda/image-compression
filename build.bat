@@ -1,7 +1,7 @@
 @echo off
 echo Choose an option:
-echo [1] Run Command A
-echo [2] Run Command B
+echo [1] For RGB
+echo [2] For Gray
 set /p choice="Enter your choice [1/2]: "
 
 if "%choice%"=="1" (
