@@ -14,4 +14,6 @@ Yup, it's that simple.
 I was about to implement this whole thing using **Python** and its nice little libraries,  
 but I had to use **MATLAB/Octave** for my uni project.  
 
+Also check out this awesome explanation on SVD and compression, I learned a lot from it : [Link Text](https://dmicz.github.io/machine-learning/svd-image-compression/)
+
 Thanks! :3
